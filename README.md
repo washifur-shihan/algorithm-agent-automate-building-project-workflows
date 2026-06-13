@@ -1,142 +1,46 @@
-# Kenneth AI Engine - API Documentation
+# Algorithm Agent: Automated Building System
 
-Welcome to the **Kenneth AI Engine**. This project serves as an intelligent backend system capable of analyzing user prompts, planning software architecture, generating code, running automatic tests, performing self-repair on generated code, and returning complete deliverables such as functioning project directories or formatted PDF reports and queries result and so on.
+This project is a powerful, multi-agent AI system capable of autonomously building any website, application, or workflow based on your natural language requests. It is framework and language agnostic, and will use whichever stack you direct it to use.
 
-## What Has Been Accomplished So Far
-The project has evolved into a robust AI pipeline. Key milestones include:
-- **Core AI Execution Loop:** An intelligent multi-step reasoning loop (`AgentController`) capable of task analysis, architecture planning, and tool execution.
-- **Project Structure Generation:** Capable of generating multiple project types including Websites, Node.js servers, and Python applications.
-- **Intelligent Project Validation:** A `ProjectValidator` that dynamically checks for entry points in various locations (e.g., root, `src/`, `app.py`, `main.py`).
-- **Runtime Testing & Self-Repair:** A `RuntimeTester` that executes generated code in a secure subprocess. If it crashes, an `AIRepairAgent` reads the traceback errors and autonomously fixes the code up to 3 times.
-- **PDF Generation Pipeline:** For research and document-heavy prompts, the engine gathers web research, formats the text, and compiles it into a downloadable PDF utilizing the `fpdf2` library.
-- **FastAPI Server Integration:** A live server (`api.py`) configured with Uvicorn that safely runs the pipeline dynamically without getting stuck in auto-reload loops when new files are generated.
+## Core Capabilities
 
----
+- **Universal Project Generation:** Construct any requested frontend UI, backend API, standalone scripts, or complete workflows.
+- **Multi-Agent Architecture:**
+  - **Decision Agent:** Analyzes the input prompt, maps out task intents, and outlines software architecture efficiently.
+  - **Execution Agent:** Writes the project codebase, managing logic and properly creating file structures and dependencies.
+  - **Preview Agent:** Handles launching and serving the built web applications locally so you can see live previews dynamically.
+  - **Debug & Bug Fix Agent:** Initiates runtime testing. If it catches a crash or bug, it automatically reads the error tracebacks and applies self-repairs in autonomous cycles.
 
-## Overall Output Scenario
-When a client application interacts with the **Algorithm AI Engine**, the internal routing handles the intent:
-1. **Web / Application Intent:** The engine will outline the architecture, generate the code files (e.g. `src/app.py`, `requirements.txt`), save them to the `generated_projects` directory, validate it, perform runtime startup tests, apply self-repairs if it fails, and finally return a `.zip` path.
-2. **Research / Document Intent:** The engine will utilize its `ResearchAgent` to fetch relevant data from the web, synthesize it, generate a PDF report, and return the `pdf_path`.
-3. **General Intent:** The engine defaults to answering the prompt generally using its reasoning loop and context builders.
+## Project Structure
 
----
-
-## API Reference
-
-### `POST /api/generate`
-The primary endpoint to trigger the AI generation pipeline.
-
-**Endpoint URL**
-```
-http://localhost:8000/api/generate
-```
-
-**Content-Type:** `application/json`
-
-**Request Body Structure**
-```json
-{
-  "prompt": "string"
-}
+```text
+├── ai_engine/
+│   ├── agent/               # Multi-step reasoning loops and agent modules
+│   ├── analyzer/            # Intent and task detection from user requests
+│   ├── context/             # Gathers required execution prompt contexts
+│   ├── core/                # Core AI loop and execution manager pipeline
+│   ├── dependency/          # Extracts and manages code requirements
+│   ├── document_processing/ # Chunking, generation, and formatting tools for PDFs
+│   ├── formatter/           # Response normalization from the LLM integrations
+│   ├── memory/              # Agent memory state management
+│   ├── planner/             # Plans architecture and maps out task execution graphs
+│   ├── project_builder/     # File parsers and dynamic smart project scaffolding
+│   ├── providers/           # Connects to AI models (e.g. OpenAI, Gemini)
+│   ├── repair/              # Agents focused purely on bug finding and runtime repairs
+│   ├── router/              # Directs paths between coding, web research, or conversation
+│   ├── tools/               # Registry containing tools (e.g., Python execution, web search)
+│   └── validator/           # Intelligent file and entry point verification
+├── tests/                   # Engine and component logic testing
+├── api.py                   # FastAPI application running the AI integration server
+└── readme.md                # Project documentation
 ```
 
----
+## How to Run
 
-## 3 Input Examples & Corresponding Outputs
+To launch the AI build server locally:
 
-### Example 1: Code Project Generation (Python App)
-This example triggers the AI to build, validate, and runtime-test a Python application. 
-
-**Request:**
-```json
-{
-  "prompt": "Create a simple Python Flask API with two endpoints: a server status check and a random number generator."
-}
-```
-
-**Expected Output (Abridged):**
-```json
-{
-  "status": "success",
-  "message": "AI generation completed.",
-  "data": {
-    "formatted_results": [
-      {
-        "task_type": "web_app",
-        "status": "success",
-        "output": "Code written correctly..."
-      }
-    ],
-    "project_path": "D:\\project_kenneth\\project_kenneth\\Kenneth_AI\\generated_projects\\python_project",
-    "zip_path": "D:\\project_kenneth\\project_kenneth\\Kenneth_AI\\generated_projects\\python_project.zip"
-  }
-}
-```
-
----
-
-### Example 2: PDF Research Report Generation
-This example triggers the AI's research tools and PDF building framework.
-
-**Request:**
-```json
-{
-  "prompt": "Research the impact of AI and Automation on Software Development and write a comprehensive report."
-}
-```
-
-**Expected Output (Abridged):**
-```json
-{
-  "status": "success",
-  "message": "AI generation completed.",
-  "data": {
-    "formatted_results": [
-      {
-        "task_type": "research",
-        "status": "success",
-        "output": "Extensive text regarding AI in software development..."
-      }
-    ],
-    "pdf_path": "D:\\project_kenneth\\project_kenneth\\Kenneth_AI\\generated_projects\\generated_report.pdf"
-  }
-}
-```
-
----
-
-### Example 3: General Query / Question Answering
-If the user intent doesn't strictly match a project or a pdf document, it returns contextualized responses directly.
-
-**Request:**
-```json
-{
-  "prompt": "What is the difference between 0.0.0.0 and 127.0.0.1?"
-}
-```
-
-**Expected Output (Abridged):**
-```json
-{
-  "status": "success",
-  "message": "AI generation completed.",
-  "data": {
-    "formatted_results": [
-      {
-        "task_type": "general",
-        "status": "success",
-        "output": "0.0.0.0 is a routing address meaning 'listen on all available network interfaces', while 127.0.0.1 is specifically the loopback interface routing exclusively to your own machine."
-      }
-    ]
-  }
-}
-```
-
----
-
-## How to Run the API
-To start the API development server locally:
 ```bash
 python api.py
 ```
-The application will launch on `http://0.0.0.0:8000`, making it accessible at `http://localhost:8000` or via your local network IP block.
+
+The server runs on `http://0.0.0.0:8000` (accessible at `http://localhost:8000`). It exposes necessary endpoints to generate projects, handle general chat prompts, or test the preview agent.
